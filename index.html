@@ -1,0 +1,1470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NOVAREVI | AUDIOVISUAL ENTITY</title>
+<meta name="description" content="Novarevi | transmedia audiovisual entity from the Andromeda Galaxy. 100% DIY music, art, video, and games.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323:wght@400&display=swap" rel="stylesheet">
+<style>
+/* ===== RESET ===== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+img { image-rendering: pixelated; display: block; }
+
+/* ===== CSS VARS ===== */
+:root {
+  --px: 'Press Start 2P', monospace;
+  --vt: 'VT323', monospace;
+  --bg: #000008;
+  --cyan: #00e5ff;
+  --mag: #ff00cc;
+  --yellow: #ffe600;
+  --green: #39ff14;
+  --purple: #9933ff;
+  --white: #e8e8ff;
+  --dim: #5566aa;
+  --panel: #08081a;
+  --border: #2233aa;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--white);
+  font-family: var(--px);
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+
+/* ===== BOOT SCREEN ===== */
+#boot-screen {
+  position: fixed;
+  inset: 0;
+  background: #000004;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(24px, 6vw, 60px);
+  transition: opacity 0.9s ease;
+}
+
+#boot-screen::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg, transparent 0px, transparent 3px,
+    rgba(0,229,255,0.03) 3px, rgba(0,229,255,0.03) 4px
+  );
+  pointer-events: none;
+}
+
+#boot-header {
+  font-family: var(--px);
+  font-size: clamp(8px, 1.6vw, 14px);
+  color: var(--cyan);
+  margin-bottom: 28px;
+  letter-spacing: 2px;
+  line-height: 1.8;
+  text-align: center;
+}
+#boot-header span { color: var(--mag); }
+
+/* INITIATE BUTTON */
+#init-btn {
+  font-family: var(--px);
+  font-size: clamp(10px, 2vw, 18px);
+  color: #000;
+  background-color: var(--green);
+  border: 2px solid var(--white);
+  padding: 15px 30px;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-bottom: 30px;
+  transition: all 0.1s;
+  box-shadow: 0 0 15px var(--green);
+}
+
+#init-btn:hover {
+  background-color: var(--white);
+  box-shadow: 0 0 25px var(--white);
+  transform: scale(1.05);
+}
+
+#init-btn:active {
+  transform: scale(0.95);
+}
+
+#boot-log {
+  font-family: var(--vt);
+  font-size: clamp(17px, 2.5vw, 22px);
+  color: var(--green);
+  line-height: 2.1;
+  min-height: 200px;
+  width: 100%;
+  max-width: 800px;
+  text-align: left;
+}
+
+#boot-cursor {
+  display: inline-block;
+  width: 10px;
+  height: 1.1em;
+  background: var(--green);
+  vertical-align: text-bottom;
+  animation: blink 0.8s step-end infinite;
+}
+
+/* ===== FIXED LAYERS ===== */
+#starfield {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  z-index: 0;
+  pointer-events: none;
+}
+
+#scanlines {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent 0px, transparent 3px,
+    rgba(0,0,0,0.14) 3px, rgba(0,0,0,0.14) 4px
+  );
+  pointer-events: none;
+  z-index: 9998;
+}
+
+/* ===== SHELL ===== */
+#shell {
+  position: relative;
+  z-index: 10;
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 24px 16px 64px;
+}
+
+/* ===== PIXEL WINDOW ===== */
+.win {
+  background: var(--panel);
+  border: 2px solid var(--border);
+  margin-bottom: 20px;
+  box-shadow:
+    0 0 0 1px #000,
+    inset 0 0 0 1px #0a0a2a,
+    0 0 28px rgba(0,100,255,0.11);
+}
+
+.win-bar {
+  background: linear-gradient(90deg, #0a1a6e 0%, #1a0a5e 100%);
+  border-bottom: 2px solid var(--border);
+  padding: 5px 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  user-select: none;
+}
+
+.win-title {
+  font-family: var(--px);
+  font-size: 7px;
+  color: var(--white);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.win-controls { display: flex; gap: 4px; }
+
+.win-btn {
+  width: 12px; height: 12px;
+  border: 1px solid var(--border);
+  background: #0a0a2a;
+  display: inline-block;
+  cursor: pointer;
+  transition: background 0.1s;
+}
+.win-btn:hover { background: var(--dim); }
+
+.win-body { padding: 20px; }
+
+/* ===== STICKY TABS ===== */
+#tabs-bar {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: #040410;
+  border-bottom: 2px solid var(--border);
+  border-top: 2px solid var(--border);
+  margin-bottom: 20px;
+}
+
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  max-width: 980px;
+  margin: 0 auto;
+}
+
+.tab {
+  font-family: var(--px);
+  font-size: 6px;
+  color: var(--dim);
+  padding: 9px 14px;
+  border-right: 1px solid var(--border);
+  cursor: pointer;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  transition: color 0.1s, background 0.1s;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.tab:hover { color: var(--white); background: #08081a; }
+.tab.active { color: var(--cyan); background: #08081a; }
+
+/* ===== HEADER ===== */
+#header .win { margin-bottom: 0; }
+#header .win-body { padding: 0; }
+
+.header-inner {
+  display: grid;
+  grid-template-columns: 1fr auto;
+}
+
+.header-left {
+  padding: 24px 24px 20px;
+  border-right: 2px solid var(--border);
+}
+
+.header-right {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 180px;
+  text-align: center;
+  background: #04040e;
+}
+
+/* ===== AUDIO TOGGLE ===== */
+#audio-controls {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 10000;
+}
+
+.audio-btn {
+  font-family: var(--px);
+  font-size: 8px;
+  background: #000;
+  color: var(--green);
+  border: 1px solid var(--green);
+  padding: 8px 12px;
+  cursor: pointer;
+  text-transform: uppercase;
+  box-shadow: 0 0 10px rgba(57,255,20,0.2);
+}
+
+.audio-btn:hover {
+  background: var(--green);
+  color: #000;
+}
+
+/* ===== OSCILLOSCOPE ===== */
+#oscilloscope {
+  width: 100%;
+  height: 50px;
+  margin: 14px 0 16px;
+  border: 1px solid var(--border);
+  background: #000;
+  display: block;
+}
+
+/* ===== BIG TITLE ===== */
+.big-title {
+  font-family: var(--px);
+  font-size: clamp(22px, 5vw, 40px);
+  color: var(--white);
+  line-height: 1.3;
+  letter-spacing: 2px;
+  text-shadow: 3px 0 0 var(--cyan), -3px 0 0 var(--mag);
+  margin-bottom: 10px;
+  animation: glitch 7s infinite;
+}
+
+@keyframes glitch {
+  0%,93%,100% { text-shadow: 3px 0 0 var(--cyan), -3px 0 0 var(--mag); transform: none; clip-path: none; }
+  94% { text-shadow: -5px 0 0 var(--cyan), 5px 0 0 var(--mag); transform: translate(3px,-2px); }
+  95% { text-shadow: 5px 0 0 var(--mag), -5px 0 0 var(--cyan); transform: translate(-2px,1px); clip-path: inset(20% 0 40% 0); }
+  96% { text-shadow: 3px 0 0 var(--cyan), -3px 0 0 var(--mag); transform: translate(1px,0); clip-path: inset(60% 0 10% 0); }
+  97% { clip-path: none; transform: none; }
+}
+
+.blink { animation: blink 1.2s step-end infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+.tagline {
+  font-family: var(--vt);
+  font-size: 18px;
+  color: var(--cyan);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+  line-height: 1.4;
+}
+
+.coord-block {
+  font-family: var(--vt);
+  font-size: 15px;
+  color: var(--dim);
+  line-height: 1.9;
+}
+.coord-block span { color: var(--yellow); }
+
+/* ===== PORTRAIT ===== */
+.portrait-frame {
+  width: 136px;
+  height: 136px;
+  border: 2px solid var(--cyan);
+  overflow: hidden;
+  margin-bottom: 10px;
+  position: relative;
+  box-shadow: 0 0 20px rgba(0,229,255,0.38);
+  flex-shrink: 0;
+}
+
+.portrait-frame::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg, transparent 0px, transparent 3px,
+    rgba(0,0,0,0.22) 3px, rgba(0,0,0,0.22) 4px
+  );
+  pointer-events: none;
+}
+
+.portrait-frame img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  filter: saturate(0.88) contrast(1.1);
+}
+
+.portrait-name {
+  font-family: var(--px);
+  font-size: 7px;
+  color: var(--white);
+  text-align: center;
+  line-height: 2;
+}
+
+.portrait-sub {
+  font-family: var(--vt);
+  font-size: 14px;
+  color: var(--mag);
+  text-align: center;
+}
+
+.reincarnation-badge {
+  display: inline-block;
+  border: 1px solid var(--yellow);
+  padding: 4px 10px;
+  font-family: var(--px);
+  font-size: 5px;
+  color: var(--yellow);
+  margin-top: 10px;
+  letter-spacing: 1px;
+  animation: pulseBorder 2s ease-in-out infinite;
+}
+
+@keyframes pulseBorder {
+  0%,100% { box-shadow: 0 0 0 rgba(255,230,0,0); }
+  50% { box-shadow: 0 0 10px rgba(255,230,0,0.45); }
+}
+
+/* ===== STATUS BAR ===== */
+.status-bar {
+  display: flex;
+  border-top: 2px solid var(--border);
+  flex-wrap: wrap;
+}
+
+.status-cell {
+  flex: 1;
+  min-width: 110px;
+  padding: 6px 12px;
+  border-right: 1px solid var(--border);
+  font-family: var(--vt);
+  font-size: 14px;
+  color: var(--dim);
+}
+.status-cell:last-child { border-right: none; }
+.status-cell span { color: var(--green); }
+
+/* ===== SECTION LABELS ===== */
+.sec-label {
+  font-family: var(--px);
+  font-size: 6px;
+  color: var(--mag);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+  display: block;
+}
+
+.sec-title {
+  font-family: var(--px);
+  font-size: clamp(12px, 2.5vw, 18px);
+  color: var(--white);
+  margin-bottom: 20px;
+  line-height: 1.5;
+}
+
+.body-text {
+  font-family: var(--vt);
+  font-size: 19px;
+  color: rgba(232,232,255,0.82);
+  line-height: 1.75;
+  margin-bottom: 14px;
+}
+.body-text strong { color: var(--cyan); }
+.body-text em { color: var(--mag); font-style: normal; }
+
+/* ===== SPEC TABLE ===== */
+.spec-table { border: 1px solid var(--border); margin-top: 16px; width: 100%; }
+
+.spec-row {
+  display: flex;
+  border-bottom: 1px solid #0e0e30;
+  align-items: baseline;
+}
+.spec-row:last-child { border-bottom: none; }
+
+.spec-key {
+  font-family: var(--px);
+  font-size: 6px;
+  color: var(--cyan);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding: 8px 12px;
+  min-width: 130px;
+  border-right: 1px solid var(--border);
+  background: rgba(0,0,0,0.3);
+}
+
+.spec-val {
+  font-family: var(--vt);
+  font-size: 17px;
+  color: var(--white);
+  padding: 6px 12px;
+}
+
+/* ===== ALBUM GRID ===== */
+.album-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.album-card {
+  border: 2px solid var(--border);
+  background: #04040e;
+  overflow: hidden;
+  transition: border-color 0.15s;
+}
+.album-card:hover { border-color: var(--cyan); }
+
+.album-img-wrap {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 1;
+}
+
+.album-img-wrap img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  transition: transform 0.35s, filter 0.35s;
+  filter: saturate(0.9);
+}
+.album-card:hover .album-img-wrap img {
+  transform: scale(1.05);
+  filter: saturate(1.35) contrast(1.1);
+}
+
+.album-img-wrap::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg, transparent 0px, transparent 3px,
+    rgba(0,0,0,0.2) 3px, rgba(0,0,0,0.2) 4px
+  );
+  pointer-events: none;
+}
+
+.album-info {
+  padding: 14px;
+  border-top: 2px solid var(--border);
+}
+
+.album-num {
+  font-family: var(--px);
+  font-size: 6px;
+  color: var(--mag);
+  letter-spacing: 2px;
+  display: block;
+  margin-bottom: 6px;
+}
+
+.album-name {
+  font-family: var(--px);
+  font-size: clamp(9px, 1.8vw, 13px);
+  color: var(--white);
+  line-height: 1.6;
+  margin-bottom: 8px;
+  text-shadow: 2px 0 0 var(--cyan), -2px 0 0 var(--mag);
+}
+
+.album-meta {
+  font-family: var(--vt);
+  font-size: 16px;
+  color: var(--dim);
+  margin-bottom: 10px;
+}
+
+.tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+
+.tag {
+  font-family: var(--px);
+  font-size: 5px;
+  letter-spacing: 1px;
+  padding: 4px 7px;
+  border: 1px solid var(--cyan);
+  color: var(--cyan);
+  text-transform: uppercase;
+}
+.tag.m { border-color: var(--mag); color: var(--mag); }
+.tag.y { border-color: var(--yellow); color: var(--yellow); }
+.tag.g { border-color: var(--green); color: var(--green); }
+.tag.p { border-color: var(--purple); color: var(--purple); }
+
+.album-desc {
+  font-family: var(--vt);
+  font-size: 16px;
+  color: rgba(232,232,255,0.72);
+  line-height: 1.65;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+}
+
+/* ===== PROJECT GRID ===== */
+.project-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.project-card {
+  border: 2px solid var(--border);
+  background: #04040e;
+  overflow: hidden;
+  transition: border-color 0.2s;
+  cursor: pointer;
+}
+.project-card:hover { border-color: var(--mag); }
+
+.project-img-wrap {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 16 / 9;
+}
+
+.project-img-wrap img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  transition: transform 0.35s, filter 0.35s;
+  filter: saturate(0.88);
+}
+.project-card:hover .project-img-wrap img {
+  transform: scale(1.07);
+  filter: saturate(1.45) contrast(1.1) hue-rotate(8deg);
+}
+
+.project-img-wrap::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg, transparent 0px, transparent 3px,
+    rgba(0,0,0,0.18) 3px, rgba(0,0,0,0.18) 4px
+  );
+  pointer-events: none;
+}
+
+.project-label {
+  padding: 10px 12px;
+  border-top: 1px solid var(--border);
+}
+
+.project-type {
+  font-family: var(--px);
+  font-size: 5px;
+  color: var(--mag);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  display: block;
+  margin-bottom: 5px;
+}
+
+.project-name {
+  font-family: var(--px);
+  font-size: clamp(6px, 1vw, 8px);
+  color: var(--white);
+  line-height: 1.7;
+}
+
+/* ===== ART GALLERY ===== */
+.art-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px;
+}
+
+.art-cell {
+  overflow: hidden;
+  border: 1px solid var(--border);
+  position: relative;
+  cursor: pointer;
+  aspect-ratio: 1;
+}
+
+.art-cell img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  transition: transform 0.35s, filter 0.35s;
+  filter: saturate(0.88);
+}
+.art-cell:hover img {
+  transform: scale(1.07);
+  filter: saturate(1.55) contrast(1.1) hue-rotate(6deg);
+}
+
+.art-cell::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg, transparent 0px, transparent 3px,
+    rgba(0,0,0,0.15) 3px, rgba(0,0,0,0.15) 4px
+  );
+  pointer-events: none;
+}
+
+/* ===== WIDE ART ===== */
+.art-wide {
+  border: 1px solid var(--border);
+  overflow: hidden;
+  margin-bottom: 4px;
+  position: relative;
+  cursor: pointer;
+}
+
+.art-wide img {
+  width: 100%;
+  filter: saturate(0.9);
+  max-height: 280px;
+  object-fit: cover;
+  transition: filter 0.3s, transform 0.3s;
+}
+.art-wide:hover img {
+  filter: saturate(1.3) contrast(1.05);
+  transform: scale(1.02);
+}
+
+.art-wide::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg, transparent 0px, transparent 3px,
+    rgba(0,0,0,0.14) 3px, rgba(0,0,0,0.14) 4px
+  );
+  pointer-events: none;
+}
+
+/* ===== LINKS ===== */
+.link-grid { display: flex; flex-wrap: wrap; gap: 10px; }
+
+.px-btn {
+  font-family: var(--px);
+  font-size: 6px;
+  letter-spacing: 1px;
+  padding: 10px 16px;
+  border: 2px solid;
+  color: inherit;
+  text-decoration: none;
+  text-transform: uppercase;
+  cursor: pointer;
+  display: inline-block;
+  transition: background 0.1s, color 0.1s, box-shadow 0.1s;
+}
+.px-btn.c { border-color: var(--cyan); color: var(--cyan); }
+.px-btn.c:hover { background: var(--cyan); color: #000; box-shadow: 0 0 12px var(--cyan); }
+.px-btn.m { border-color: var(--mag); color: var(--mag); }
+.px-btn.m:hover { background: var(--mag); color: #000; box-shadow: 0 0 12px var(--mag); }
+.px-btn.y { border-color: var(--yellow); color: var(--yellow); }
+.px-btn.y:hover { background: var(--yellow); color: #000; box-shadow: 0 0 12px var(--yellow); }
+.px-btn.g { border-color: var(--green); color: var(--green); }
+.px-btn.g:hover { background: var(--green); color: #000; box-shadow: 0 0 12px var(--green); }
+
+/* ===== TERMINAL ===== */
+.terminal {
+  background: #000;
+  border: 1px solid var(--green);
+  padding: 14px 16px;
+  font-family: var(--vt);
+  font-size: 17px;
+  color: var(--green);
+  line-height: 1.85;
+  margin-top: 14px;
+  box-shadow: 0 0 12px rgba(57,255,20,0.08);
+}
+.terminal .prompt { color: var(--cyan); }
+
+/* ===== FOOTER ===== */
+.footer-txt {
+  font-family: var(--px);
+  font-size: 5px;
+  color: var(--dim);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+.footer-txt span { color: var(--cyan); }
+
+/* ===== LAYOUT HELPERS ===== */
+.two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+.px-divider {
+  height: 2px;
+  background: repeating-linear-gradient(
+    90deg,
+    var(--cyan) 0px, var(--cyan) 4px,
+    transparent 4px, transparent 8px,
+    var(--mag) 8px, var(--mag) 12px,
+    transparent 12px, transparent 16px
+  );
+  margin: 16px 0;
+  opacity: 0.5;
+}
+
+.glow-c { color: var(--cyan); text-shadow: 0 0 8px var(--cyan); }
+.glow-m { color: var(--mag); text-shadow: 0 0 8px var(--mag); }
+
+/* ===== LIGHTBOX ===== */
+#lightbox {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,10,0.94);
+  z-index: 9990;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  cursor: pointer;
+}
+#lightbox.open { display: flex; }
+
+#lightbox img {
+  max-width: 92vw;
+  max-height: 92vh;
+  object-fit: contain;
+  border: 2px solid var(--border);
+  box-shadow: 0 0 50px rgba(0,100,255,0.3);
+  image-rendering: auto;
+}
+
+#lightbox-close {
+  position: absolute;
+  top: 20px;
+  right: 24px;
+  font-family: var(--px);
+  font-size: 8px;
+  color: var(--dim);
+  letter-spacing: 2px;
+  pointer-events: none;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 680px) {
+  .two-col { grid-template-columns: 1fr; }
+  .header-inner { grid-template-columns: 1fr; }
+  .header-right { border-top: 2px solid var(--border); min-width: unset; }
+  .album-grid { grid-template-columns: 1fr; }
+  .project-grid { grid-template-columns: 1fr 1fr; }
+  .art-grid { grid-template-columns: 1fr 1fr; }
+}
+
+@media (max-width: 420px) {
+  .project-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<audio id="bg-music" loop>
+  <source src="boreal_reflections.mp3" type="audio/mpeg">
+</audio>
+
+<div id="boot-screen">
+  <div id="boot-header">
+    NOVAREVI<span>.EXE</span> | AUDIOVISUAL ENTITY SYSTEM<br>
+    BIOS v2.0 | ANDROMEDA SIGNAL RECEIVER
+  </div>
+  
+  <button id="init-btn">INITIATE SEQUENCE</button>
+
+  <div id="boot-log" style="display:none;"><span id="boot-cursor"></span></div>
+</div>
+
+<canvas id="starfield"></canvas>
+<div id="scanlines"></div>
+
+<div id="shell" style="display:none">
+
+  <div id="audio-controls">
+    <button id="mute-btn" class="audio-btn">AUDIO: ON</button>
+  </div>
+
+  <div id="header">
+    <div class="win" style="margin-bottom:0">
+      <div class="win-bar">
+        <span class="win-title">+ NOVAREVI.EXE | AUDIOVISUAL ENTITY v2.0</span>
+        <div class="win-controls">
+          <span class="win-btn"></span>
+          <span class="win-btn"></span>
+          <span class="win-btn"></span>
+        </div>
+      </div>
+      <div class="win-body" style="padding:0">
+        <div class="header-inner">
+          <div class="header-left">
+            <div class="big-title">NOVA<span class="glow-m">REVI</span><span class="blink" style="color:var(--cyan)">_</span></div>
+            <div class="tagline">
+              TRANSMEDIA ENTITY<br>
+              ORIGIN: ANDROMEDA // SIGNAL: ACTIVE
+            </div>
+            <canvas id="oscilloscope"></canvas>
+            <div class="coord-block">
+              [STATUS] <span>REINCARNATION II | ONLINE</span><br>
+              [GENRE]  <span>DnB · HARDCORE · RAVE · JUNGLE · AMBIENT · BREAKCORE</span><br>
+              [PROD]   <span>100% DIY // SINCE 2023</span><br>
+              [STACK]  <span>ABLETON · RENOISE · VEGAS PRO</span>
+            </div>
+          </div>
+          <div class="header-right">
+            <div class="portrait-frame">
+              <img src="Novarevi_-_Super_Coomer_Visual_Art_Beta_Version-1.webp" alt="Novarevi">
+            </div>
+            <div class="portrait-name">NOVAREVI</div>
+            <div class="portrait-sub">ANDROMEDA ENTITY</div>
+            <div class="reincarnation-badge">INCARNATION II / ∞</div>
+          </div>
+        </div>
+        <div class="status-bar">
+          <div class="status-cell">ALBUMS: <span>2</span></div>
+          <div class="status-cell">TRACKS: <span>28</span></div>
+          <div class="status-cell">CLIPS: <span>DIY 100%</span></div>
+          <div class="status-cell">ART: <span>ORIGINAL</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="tabs-bar">
+    <div class="tabs">
+      <a class="tab active" href="#lore">LORE.TXT</a>
+      <a class="tab" href="#disco">REINCARNATIONS.EXE</a>
+      <a class="tab" href="#visual">VISUAL.DAT</a>
+      <a class="tab" href="#projects">PROJECTS.SYS</a>
+      <a class="tab" href="#links">SIGNAL.BAT</a>
+    </div>
+  </div>
+
+  <div class="win" id="lore">
+    <div class="win-bar">
+      <span class="win-title">+ LORE.TXT | ORIGIN SIGNAL</span>
+      <div class="win-controls"><span class="win-btn"></span><span class="win-btn"></span><span class="win-btn"></span></div>
+    </div>
+    <div class="win-body">
+      <div class="two-col">
+        <div>
+          <span class="sec-label">// 001 | THE ENTITY</span>
+          <h2 class="sec-title">ORIGIN<br>SIGNAL</h2>
+          <p class="body-text">
+            <strong>Novarevi</strong> is a being from the Andromeda Galaxy. Cursed with immortality, condemned to reincarnate endlessly on Earth. Each reincarnation is an album. Each album is a new life — new consciousness, new sound, new body.
+          </p>
+          <p class="body-text">
+            Two albums released = two deaths = two resurrections. The sound shifts because the being shifts. The entity does not evolve linearly — it <em>transmutes</em>.
+          </p>
+          <div class="px-divider"></div>
+          <span class="sec-label">// 001b | MISSION DIRECTIVE</span>
+          <p class="body-text">
+            Spread the Andromeda signal to as many planets as possible. With each death, be reborn higher. With each album, a new frequency.
+          </p>
+          <p class="body-text">
+            Every piece of art, every cover, every clip — <strong>100% original</strong>. No team. No budget. No agency. Hardware limitation absorbed and forged into aesthetic.
+          </p>
+          <div class="terminal">
+            <span class="prompt">N:\> </span>cat MISSION.TXT<br>
+            <span style="color:#aaffaa">
+              Spread the Andromeda signal.<br>
+              To as many planets as possible.<br>
+              With each death, be reborn higher.<br>
+              With each album, a new frequency.<br>
+              <br>
+              "limitation is the aesthetic."<br>
+            </span>
+            <span class="prompt">N:\> <span class="blink">_</span></span>
+          </div>
+        </div>
+        <div>
+          <div class="art-wide" onclick="openLightbox('nova_naissance.png')">
+            <img src="nova_naissance.png" alt="Nova's Naissance">
+          </div>
+          <div class="art-wide" style="margin-top:4px" onclick="openLightbox('Nova Mundo.png')">
+            <img src="Nova Mundo.png" alt="Nova Mundo">
+          </div>
+          <div class="spec-table" style="margin-top:12px">
+            <div class="spec-row"><span class="spec-key">ENTITY</span><span class="spec-val">Novarevi</span></div>
+            <div class="spec-row"><span class="spec-key">ORIGIN</span><span class="spec-val">Andromeda Galaxy</span></div>
+            <div class="spec-row"><span class="spec-key">ACTIVE SINCE</span><span class="spec-val">2023</span></div>
+            <div class="spec-row"><span class="spec-key">DAW</span><span class="spec-val">Ableton Live · Renoise</span></div>
+            <div class="spec-row"><span class="spec-key">VIDEO</span><span class="spec-val">Vegas Pro 13</span></div>
+            <div class="spec-row"><span class="spec-key">GENRES</span><span class="spec-val">DnB · Breakcore · Hardcore Rave · Ambient · Noise</span></div>
+            <div class="spec-row"><span class="spec-key">REINCARNATIONS</span><span class="spec-val">II (ongoing)</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="win" id="disco">
+    <div class="win-bar">
+      <span class="win-title">+ REINCARNATIONS.EXE | DISCOGRAPHY</span>
+      <div class="win-controls"><span class="win-btn"></span><span class="win-btn"></span><span class="win-btn"></span></div>
+    </div>
+    <div class="win-body">
+      <span class="sec-label">// 002 | LIFE CYCLES</span>
+      <h2 class="sec-title">REINCARNATIONS</h2>
+      <div class="album-grid">
+        <div class="album-card">
+          <div class="album-img-wrap" style="cursor:pointer" onclick="openLightbox('nova_capa1.png')">
+            <img src="nova_capa1.png" alt="Nova's Naissance">
+          </div>
+          <div class="album-info">
+            <span class="album-num">// REINCARNATION I | DEATH AND BIRTH</span>
+            <div class="album-name">NOVA'S NAISSANCE</div>
+            <div class="album-meta">October 2025 · 11 tracks · Symphonic Distribution</div>
+            <div class="tag-row">
+              <span class="tag">Cyber</span>
+              <span class="tag">Heaven</span>
+              <span class="tag">Hardcore</span>
+              <span class="tag">Space</span>
+              <span class="tag y">Birth</span>
+            </div>
+            <p class="album-desc">
+              First body. First scream. The debut album mapped the birth of an alien consciousness — cyber-heaven, trance hardcore, spatial textures. 11 tracks built on hardware that "shouldn't have been able to." It did.
+            </p>
+          </div>
+        </div>
+        <div class="album-card">
+          <div class="album-img-wrap" style="cursor:pointer" onclick="openLightbox('DopamineParty.png')">
+            <img src="DopamineParty.png" alt="Dopamine Party">
+          </div>
+          <div class="album-info">
+            <span class="album-num">// REINCARNATION II | CHAOTIC EVOLUTION</span>
+            <div class="album-name">DOPAMINE PARTY</div>
+            <div class="album-meta">May 2026 · 17 tracks</div>
+            <div class="tag-row">
+              <span class="tag m">High Energy</span>
+              <span class="tag m">Rave</span>
+              <span class="tag m">Synth-Driven</span>
+              <span class="tag m">Chaos</span>
+              <span class="tag y">Evolution</span>
+            </div>
+            <p class="album-desc">
+              Second life. Second body. 17 radically distinct tracks — in the best possible way. Synths as protagonists, high-energy rave, structures that escape every formula. Each track is a different world within the same being.
+            </p>
+          </div>
+        </div>
+      </div>
+      <div class="terminal" style="margin-top:16px">
+        <span class="prompt">N:\DISCO> </span>dir /reincarnations<br>
+        <span style="color:#aaaaff">
+          [I]   NOVA'S_NAISSANCE.ZIP......... 11 tracks · OCT 2025<br>
+          [II]  DOPAMINE_PARTY.ZIP............ 17 tracks · MAY 2026<br>
+          [???] REINCARNATION_III.EXE........ [PROCESSING...]<br>
+        </span>
+        <span class="prompt">N:\DISCO> <span class="blink">_</span></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="win" id="visual">
+    <div class="win-bar">
+      <span class="win-title">+ VISUAL.DAT | ART DIRECTION & VIDEO</span>
+      <div class="win-controls"><span class="win-btn"></span><span class="win-btn"></span><span class="win-btn"></span></div>
+    </div>
+    <div class="win-body">
+      <div class="two-col" style="margin-bottom:20px">
+        <div>
+          <span class="sec-label">// 003 | VISUAL WAR</span>
+          <h2 class="sec-title">ART &<br>VIDEO</h2>
+          <p class="body-text">
+            <strong>100% of all artwork, covers, clips, and illustrations are original.</strong> No team, no budget, no agency.
+          </p>
+          <p class="body-text">
+            Music videos produced with <em>Vegas Pro 13</em> — 2013 software on 2013 hardware. Every rendered frame was a gamble. The results speak for themselves.
+          </p>
+          <p class="body-text">
+            Visual language fuses manga, glitch digital, 90s sci-fi, and early-2000s net art. Born from the inside out.
+          </p>
+        </div>
+        <div>
+          <div class="art-wide" onclick="openLightbox('genaum_no_espaco.png')">
+            <img src="genaum_no_espaco.png" alt="Genaum no Espaço">
+          </div>
+        </div>
+      </div>
+      <div class="art-grid">
+        <div class="art-cell" onclick="openLightbox('Novarevi Avatar.png')">
+          <img src="Novarevi Avatar.png" alt="Novarevi Avatar">
+        </div>
+        <div class="art-cell" onclick="openLightbox('Novarevi First Draw.png')">
+          <img src="Novarevi First Draw.png" alt="Novarevi First Draw">
+        </div>
+        <div class="art-cell" onclick="openLightbox('Novarevi Sheran Space Commander.png')">
+          <img src="Novarevi Sheran Space Commander.png" alt="Space Commander">
+        </div>
+        <div class="art-cell" onclick="openLightbox('DopamineParty.png')">
+          <img src="DopamineParty.png" alt="Dopamine Party Art">
+        </div>
+        <div class="art-cell" onclick="openLightbox('Nova Mundo.png')">
+          <img src="Nova Mundo.png" alt="Nova Mundo">
+        </div>
+        <div class="art-cell" onclick="openLightbox('nova_capa1.png')">
+          <img src="nova_capa1.png" alt="Nova's Naissance Cover">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="win" id="projects">
+    <div class="win-bar">
+      <span class="win-title">+ PROJECTS.SYS | EXTENDED UNIVERSE</span>
+      <div class="win-controls"><span class="win-btn"></span><span class="win-btn"></span><span class="win-btn"></span></div>
+    </div>
+    <div class="win-body">
+      <span class="sec-label">// 004 | TRANSMEDIA WORKS</span>
+      <h2 class="sec-title">PROJECTS &<br>RELEASES</h2>
+      <div class="project-grid">
+        <div class="project-card" onclick="openLightbox('Nova_s_Possessive_Love.png')">
+          <div class="project-img-wrap">
+            <img src="Nova_s_Possessive_Love.png" alt="Nova's Possessive Love">
+          </div>
+          <div class="project-label">
+            <span class="project-type">Visual Novel</span>
+            <div class="project-name">NOVA'S<br>POSSESSIVE LOVE</div>
+          </div>
+        </div>
+        <div class="project-card" onclick="openLightbox('Horny_BPM_Syndrome_Thumbnail.png')">
+          <div class="project-img-wrap">
+            <img src="Horny_BPM_Syndrome_Thumbnail.png" alt="Horny BPM Syndrome">
+          </div>
+          <div class="project-label">
+            <span class="project-type">Retro Game</span>
+            <div class="project-name">HORNY BPM<br>SYNDROME</div>
+          </div>
+        </div>
+        <div class="project-card" onclick="openLightbox('Novarevi_-_Super_Coomer_Visual_Art_Beta_Version-1.webp')">
+          <div class="project-img-wrap">
+            <img src="Novarevi_-_Super_Coomer_Visual_Art_Beta_Version-1.webp" alt="Super Coomer">
+          </div>
+          <div class="project-label">
+            <span class="project-type">Visual Art · Single</span>
+            <div class="project-name">SUPER COOMER<br>BETA v1</div>
+          </div>
+        </div>
+      </div>
+      <div class="terminal" style="margin-top:16px">
+        <span class="prompt">N:\PROJECTS> </span>ls -la<br>
+        <span style="color:#aaaaff">
+          nova_possessive_love/ ......... [VISUAL NOVEL]<br>
+          horny_bpm_syndrome/ ........... [RETRO GAME]<br>
+          super_coomer_beta/ ............ [VISUAL ART · SINGLE]<br>
+          ???_next_project.exe .......... [UNDISCLOSED]<br>
+        </span>
+        <span class="prompt">N:\PROJECTS> <span class="blink">_</span></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="win" id="links">
+    <div class="win-bar">
+      <span class="win-title">+ SIGNAL.BAT | TRANSMISSION COORDINATES</span>
+      <div class="win-controls"><span class="win-btn"></span><span class="win-btn"></span><span class="win-btn"></span></div>
+    </div>
+    <div class="win-body">
+      <span class="sec-label">// 005 | FIND THE ENTITY</span>
+      <h2 class="sec-title" style="margin-bottom:16px">LINKS</h2>
+      <p class="body-text" style="margin-bottom:20px">For bookings, partnerships, licensing, demos, or direct contact.</p>
+      <div class="link-grid">
+        <a href="https://open.spotify.com" target="_blank" rel="noopener" class="px-btn c">▶ SPOTIFY</a>
+        <a href="https://novarevi.bandcamp.com" target="_blank" rel="noopener" class="px-btn c">▶ BANDCAMP</a>
+        <a href="https://twitter.com/novarevi" target="_blank" rel="noopener" class="px-btn m">▶ TWITTER/X</a>
+        <a href="https://www.youtube.com/@lord_novarevi" target="_blank" rel="noopener" class="px-btn y">▶ YOUTUBE</a>
+        <a href="https://www.instagram.com/lord_novarevi" target="_blank" rel="noopener" class="px-btn g">▶ INSTAGRAM</a>
+      </div>
+      <div class="terminal">
+        <span class="prompt">N:\> </span>ping andromeda.signal<br>
+        <span style="color:#aaffaa">
+          Connecting to Andromeda server...<br>
+          Response received in: 2,537,000 light-years<br>
+          Latency: acceptable.<br>
+          <br>
+          Faster channels:<br>
+          Twitter:   @novarevi<br>
+          Instagram: @lord_novarevi<br>
+          YouTube:   @lord_novarevi<br>
+        </span>
+        <span class="prompt">N:\> <span class="blink">_</span></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="win">
+    <div class="win-body" style="padding:12px 20px">
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px">
+        <span class="footer-txt">© 2026 <span>NOVAREVI</span></span>
+        <span class="footer-txt">ANDROMEDA GALAXY · <span>EARTH TRANSMISSION</span></span>
+        <span class="footer-txt">ALL RIGHTS RESERVED.</span>
+      </div>
+    </div>
+  </div>
+
+</div><div id="lightbox" onclick="closeLightbox()">
+  <span id="lightbox-close">× CLOSE</span>
+  <img id="lightbox-img" src="" alt="Artwork">
+</div>
+
+<script>
+/* ============================================================
+   AUDIO CONTROLS
+   ============================================================ */
+const bgMusic = document.getElementById('bg-music');
+const muteBtn = document.getElementById('mute-btn');
+// Set a low/medium volume
+bgMusic.volume = 0.3;
+
+muteBtn.addEventListener('click', () => {
+  if (bgMusic.paused) {
+    bgMusic.play();
+    muteBtn.innerText = 'AUDIO: ON';
+    muteBtn.style.background = 'var(--green)';
+    muteBtn.style.color = '#000';
+  } else {
+    bgMusic.pause();
+    muteBtn.innerText = 'AUDIO: OFF';
+    muteBtn.style.background = '#000';
+    muteBtn.style.color = 'var(--green)';
+  }
+});
+
+/* ============================================================
+   BOOT SEQUENCE
+   ============================================================ */
+const bootLines = [
+  '> INITIALIZING NOVAREVI.EXE...',
+  '> SCANNING ANDROMEDA FREQUENCIES...',
+  '> LOADING REINCARNATION DATABASE...',
+  '> CALIBRATING VISUAL MATRIX...',
+  '> PARSING AUDIO SIGNATURES [28 TRACKS]...',
+  '> VALIDATING ORIGINAL ARTWORK...',
+  '> ENTITY ONLINE // SIGNAL LOCKED.',
+];
+
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+async function typeLine(container, text) {
+  const cursor = document.getElementById('boot-cursor');
+  for (const ch of text) {
+    container.insertBefore(document.createTextNode(ch), cursor);
+    await sleep(14 + Math.random() * 28);
+  }
+  container.insertBefore(document.createElement('br'), cursor);
+}
+
+const initBtn = document.getElementById('init-btn');
+
+initBtn.addEventListener('click', async () => {
+  // Try to play audio immediately upon user interaction
+  bgMusic.play().catch(e => console.log("Audio play prevented:", e));
+  
+  initBtn.style.display = 'none';
+  const log  = document.getElementById('boot-log');
+  const scrn = document.getElementById('boot-screen');
+  log.style.display = 'block';
+
+  await sleep(200);
+  for (const line of bootLines) {
+    await typeLine(log, line);
+    await sleep(100 + Math.random() * 80);
+  }
+
+  await sleep(600);
+  scrn.style.opacity = '0';
+  await sleep(800);
+  scrn.style.display = 'none';
+
+  const shell = document.getElementById('shell');
+  shell.style.display = 'block';
+  initOscilloscope();
+});
+
+/* ============================================================
+   STARFIELD + WARP EFFECT
+   ============================================================ */
+const canvas = document.getElementById('starfield');
+const ctx    = canvas.getContext('2d');
+let W, H, stars = [];
+let warpIntensity = 0;
+
+function resize() {
+  W = canvas.width  = window.innerWidth;
+  H = canvas.height = window.innerHeight;
+}
+
+function initStars() {
+  stars = [];
+  const count = Math.floor((W * H) / 2600);
+  for (let i = 0; i < count; i++) {
+    const speed = Math.random() * 0.15 + 0.02;
+    stars.push({
+      x: Math.random() * W,
+      y: Math.random() * H,
+      r: Math.random() * 1.4 + 0.2,
+      speed,
+      baseSpeed: speed,
+      twinkle: Math.random() * Math.PI * 2,
+      twinkleSpeed: Math.random() * 0.03 + 0.01,
+      color: ['#ffffff','#aaccff','#ffaaff','#aaffff','#ffe680'][Math.floor(Math.random() * 5)]
+    });
+  }
+}
+
+function triggerWarp() {
+  const start    = performance.now();
+  const duration = 1900;
+  const tick = now => {
+    const t = Math.min(1, (now - start) / duration);
+    warpIntensity = Math.sin(t * Math.PI) * 13;
+    if (t < 1) requestAnimationFrame(tick);
+    else warpIntensity = 0;
+  };
+  requestAnimationFrame(tick);
+}
+
+// Schedule random warp bursts
+(function scheduleWarp() {
+  setTimeout(() => { triggerWarp(); scheduleWarp(); }, 12000 + Math.random() * 20000);
+})();
+
+function drawFrame() {
+  ctx.clearRect(0, 0, W, H);
+
+  // Deep space gradient
+  const bg = ctx.createLinearGradient(0, 0, 0, H);
+  bg.addColorStop(0,   '#000008');
+  bg.addColorStop(0.4, '#020010');
+  bg.addColorStop(1,   '#000208');
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, W, H);
+
+  // Nebula blobs
+  [[0.2,0.3,180,260],[0.7,0.6,220,200],[0.5,0.8,150,310]].forEach(([nx,ny,nr,hue]) => {
+    const g = ctx.createRadialGradient(W*nx, H*ny, 0, W*nx, H*ny, nr);
+    g.addColorStop(0, `hsla(${hue},70%,25%,0.07)`);
+    g.addColorStop(1, 'transparent');
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, W, H);
+  });
+
+  // Stars
+  for (const s of stars) {
+    s.twinkle += s.twinkleSpeed;
+    const alpha = 0.5 + 0.5 * Math.sin(s.twinkle);
+    s.speed = s.baseSpeed + warpIntensity;
+
+    ctx.save();
+    ctx.globalAlpha = alpha;
+
+    if (warpIntensity > 2) {
+      // Streak mode
+      const len = warpIntensity * 2.8;
+      ctx.strokeStyle = s.color;
+      ctx.lineWidth   = s.r;
+      ctx.beginPath();
+      ctx.moveTo(s.x, s.y - len);
+      ctx.lineTo(s.x, s.y + s.r);
+      ctx.stroke();
+    } else {
+      ctx.fillStyle = s.color;
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+      ctx.fill();
+      if (s.r > 1.1) {
+        const g = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, s.r * 4);
+        g.addColorStop(0, s.color);
+        g.addColorStop(1, 'transparent');
+        ctx.fillStyle = g;
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, s.r * 4, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    ctx.restore();
+    s.y += s.speed;
+    if (s.y > H) { s.y = 0; s.x = Math.random() * W; }
+  }
+
+  requestAnimationFrame(drawFrame);
+}
+
+window.addEventListener('resize', () => { resize(); initStars(); });
+resize();
+initStars();
+drawFrame();
+
+/* ============================================================
+   OSCILLOSCOPE — signal visualizer in header
+   ============================================================ */
+function initOscilloscope() {
+  const osc = document.getElementById('oscilloscope');
+  if (!osc) return;
+
+  // Set canvas resolution to match CSS display size
+  const setSize = () => {
+    osc.width  = osc.clientWidth;
+    osc.height = osc.clientHeight;
+  };
+  setSize();
+  window.addEventListener('resize', setSize);
+
+  const oc = osc.getContext('2d');
+  let t = 0, glitchFrames = 0, isGlitching = false;
+
+  function drawOsc() {
+    const w = osc.width, h = osc.height;
+    if (!w || !h) { requestAnimationFrame(drawOsc); return; }
+
+    oc.clearRect(0, 0, w, h);
+    oc.fillStyle = '#000';
+    oc.fillRect(0, 0, w, h);
+
+    // Random glitch trigger
+    if (!isGlitching && Math.random() < 0.007) {
+      isGlitching   = true;
+      glitchFrames  = 4 + Math.floor(Math.random() * 6);
+    }
+    if (isGlitching) {
+      glitchFrames--;
+      if (glitchFrames <= 0) isGlitching = false;
+    }
+
+    const col = isGlitching ? '#ff00cc' : '#00e5ff';
+    oc.strokeStyle = col;
+    oc.lineWidth   = 1.5;
+    oc.shadowColor = col;
+    oc.shadowBlur  = 5;
+
+    oc.beginPath();
+    const phase = t * 0.045;
+    for (let x = 0; x <= w; x++) {
+      const p = x / w;
+      let y = h / 2 + h * (
+        0.30 * Math.sin(p * Math.PI * 2 * 2.5  + phase) +
+        0.13 * Math.sin(p * Math.PI * 2 * 5.1  + phase * 1.3) +
+        0.07 * Math.sin(p * Math.PI * 2 * 8.7  + phase * 0.7)
+      );
+      if (isGlitching) y += (Math.random() - 0.5) * h * 0.25;
+      x === 0 ? oc.moveTo(x, y) : oc.lineTo(x, y);
+    }
+    oc.stroke();
+
+    t++;
+    requestAnimationFrame(drawOsc);
+  }
+
+  drawOsc();
+}
+
+/* ============================================================
+   LIGHTBOX
+   ============================================================ */
+function openLightbox(src) {
+  document.getElementById('lightbox-img').src = src;
+  document.getElementById('lightbox').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeLightbox() {
+  document.getElementById('lightbox').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeLightbox();
+});
+
+/* ============================================================
+   STICKY TAB HIGHLIGHT ON SCROLL
+   ============================================================ */
+const sectionIds = ['lore', 'disco', 'visual', 'projects', 'links'];
+const tabs        = document.querySelectorAll('.tab');
+
+tabs.forEach(tab => {
+  tab.addEventListener('click', function() {
+    tabs.forEach(t => t.classList.remove('active'));
+    this.classList.add('active');
+  });
+});
+
+window.addEventListener('scroll', () => {
+  const scrollY   = window.scrollY + 120;
+  let currentIdx  = 0;
+  sectionIds.forEach((id, i) => {
+    const el = document.getElementById(id);
+    if (el && el.offsetTop <= scrollY) currentIdx = i;
+  });
+  tabs.forEach((t, i) => t.classList.toggle('active', i === currentIdx));
+}, { passive: true });
+</script>
+</body>
+</html>
